@@ -1,11 +1,14 @@
 <script>
+	// @ts-nocheck
+
 	import { SiDiscord, SiGithub, SiLastdotfm, SiProtonmail } from '@icons-pack/svelte-simple-icons';
 	import Social from '../components/Social.svelte';
 	import StatusAvatar from '../components/StatusAvatar.svelte';
+	import { resolve } from '$app/paths';
 </script>
 
 <img
-	src="/dithered-kharkiv.png"
+	src={resolve('/dithered-kharkiv.png')}
 	class="absolute -z-40 h-screen w-screen object-cover opacity-20 dark:opacity-10"
 	alt=""
 />
