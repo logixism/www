@@ -12,8 +12,6 @@
 		const userId = '804066391614423061';
 		const res = await fetch(`https://api.lanyard.rest/v1/users/${userId}`);
 
-		console.log(res)
-
 		if (res.ok) {
 			const data = await res.json();
 			status = data?.data?.discord_status ?? 'offline';
@@ -23,7 +21,7 @@
 </script>
 
 <img
-	src="/dithered-kharkiv.png"
+	src="dithered-kharkiv.png"
 	class="absolute -z-40 h-screen w-screen object-cover animate-opacity duration-300"
 	alt=""
 	style="opacity: {pfp ? 0.2 : 0.6}"
