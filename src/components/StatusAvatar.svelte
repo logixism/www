@@ -18,7 +18,7 @@
 		height="96"
 		decoding="async"
 		data-nimg="1"
-		class="h-24 w-24 object-cover ring-2 "
+		class="h-24 w-24 object-cover ring-2 grayscale"
 		style="color:transparent"
 		src={`https://cdn.discordapp.com/avatars/804066391614423061/${pfp}.webp`}
 	/>
