@@ -126,6 +126,8 @@ function getDisplayName(lanyard: LanyardData | null): string {
   return lanyard?.discord_user.global_name ?? config.fallbackUser.global_name;
 }
 
+export const revalidate = 5;
+
 export default async function Home() {
   const lanyardRes = await getLanyardData();
   const lanyard = lanyardRes.ok ? lanyardRes.unwrap() : null;
