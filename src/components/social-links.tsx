@@ -51,7 +51,7 @@ function SocialLinkItem({ link }: SocialLinkItemProps) {
 
 export default function SocialLinks() {
   return (
-    <div className="flex flex-row w-full mt-6 border rounded-lg divide-x divide-border overflow-hidden">
+    <div className="flex flex-row w-full mt-6 border rounded-lg divide-x divide-border overflow-hidden ">
       {config.socialLinks.map((link) => (
         <SocialLinkItem key={link.name} link={link} />
       ))}
