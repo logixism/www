@@ -48,12 +48,12 @@ export const config = {
     {
       name: "last.fm",
       icon: SiLastdotfm,
-      textToCopy: "https://www.last.fm/user/logixism",
+      href: "https://www.last.fm/user/logixism",
     },
     {
       name: "Roblox",
       icon: SiRoblox,
-      textToCopy: "https://roblox.com/users/2947401001/profile",
+      href: "https://roblox.com/users/2947401001/profile",
     },
   ],
 } as const satisfies AppConfig;
