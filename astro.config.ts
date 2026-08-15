@@ -10,6 +10,14 @@ export default defineConfig({
     // eagerly discovered profile image.
     inlineStylesheets: "always",
   },
+  vite: {
+    ssr: {
+      // v0.4.0 contains an extensionless internal ESM import that Node cannot
+      // resolve when Vercel loads the package externally. Bundling it lets
+      // Vite resolve that import during the build instead.
+      noExternal: ["@material/material-color-utilities"],
+    },
+  },
   markdown: { syntaxHighlight: false },
   security: {
     checkOrigin: true,
