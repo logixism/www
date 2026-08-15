@@ -121,7 +121,7 @@ export function getPresenceService(): PresenceService {
         .select((game) => ({
           name: game.name,
           cover: {
-            imageId: game.cover?.image_id,
+            image_id: game.cover?.image_id,
           },
         }))
         .limit(10)
