@@ -4,6 +4,12 @@ import { defineConfig } from "astro/config";
 export default defineConfig({
   output: "server",
   adapter: vercel(),
+  build: {
+    // The site stylesheet is small and contains the complete initial layout.
+    // Keeping it in the HTML prevents a separate CSS request from racing the
+    // eagerly discovered profile image.
+    inlineStylesheets: "always",
+  },
   markdown: { syntaxHighlight: false },
   security: {
     checkOrigin: true,

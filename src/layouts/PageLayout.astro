@@ -17,6 +17,13 @@ const { description, title } = Astro.props;
     <meta name="description" content={description} />
     <title>{title}</title>
 
+    <script is:inline>
+      document.documentElement.classList.add("js");
+      setTimeout(() => document.documentElement.classList.remove("js"), 3000);
+    </script>
+    <script>
+      import "../client";
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -26,8 +33,5 @@ const { description, title } = Astro.props;
   </head>
   <body>
     <slot />
-    <script>
-      import "../client";
-    </script>
   </body>
 </html>

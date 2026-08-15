@@ -33,6 +33,9 @@ presence-controller {
   background: var(--md-sys-color-background);
   color: var(--md-sys-color-on-background);
 }
+.js .page-theme:not(:defined) {
+  visibility: hidden;
+}
 .site-main {
   display: grid;
   align-content: center;
