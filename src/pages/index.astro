@@ -8,6 +8,7 @@ import { getAverageImageColorServer } from "../server/image-color";
 import { getPresenceService } from "../server/lanyard";
 import { getActivityPresentation } from "../shared/activity-view";
 import { LANYARD_SOCKET_URL } from "../shared/profile";
+import { getThemeBackgrounds } from "../shared/theme";
 
 const presence = await getPresenceService().getPresence();
 const presentation = getActivityPresentation(presence);
@@ -19,13 +20,20 @@ try {
   console.error("Could not derive server-rendered avatar theme color", error);
 }
 
+const themeBackgrounds = getThemeBackgrounds(themeColor);
+
 const bootstrapState = JSON.stringify({
   presence,
   socketUrl: LANYARD_SOCKET_URL,
 });
 ---
 
-<PageLayout title="logix" description="my cool website">
+<PageLayout
+  title="logix"
+  description="my cool website"
+  backgroundLight={themeBackgrounds.light}
+  backgroundDark={themeBackgrounds.dark}
+>
   <presence-controller data-state={bootstrapState}>
     <m3e-theme
       class="page-theme"

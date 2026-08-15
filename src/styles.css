@@ -9,12 +9,12 @@
 html,
 body {
   min-height: 100%;
+  background: var(--initial-background, #141316);
 }
 body {
   margin: 0;
   min-width: 20rem;
   min-height: 100svh;
-  background: #131316;
   font-family: "Google Sans Flex", sans-serif;
   font-optical-sizing: auto;
   font-style: normal;
@@ -24,6 +24,12 @@ body {
     "GRAD" 0,
     "ROND" 0;
 }
+@media (forced-colors: active) {
+  html,
+  body {
+    background: Canvas;
+  }
+}
 presence-controller {
   display: contents;
 }
@@ -32,8 +38,11 @@ presence-controller {
   min-height: 100svh;
   background: var(--md-sys-color-background);
   color: var(--md-sys-color-on-background);
+  opacity: 1;
+  transition: opacity 100ms ease-out;
 }
 .js .page-theme:not(:defined) {
+  opacity: 0;
   visibility: hidden;
 }
 .site-main {
@@ -322,6 +331,11 @@ presence-controller {
 @media (prefers-color-scheme: dark) {
   .activity-artwork {
     opacity: 0.1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .page-theme {
+    transition: none;
   }
 }
 @media (min-width: 48rem) {

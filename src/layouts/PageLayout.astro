@@ -2,24 +2,46 @@
 import "../styles.css";
 
 interface Props {
+  backgroundDark: string;
+  backgroundLight: string;
   description: string;
   title: string;
 }
 
-const { description, title } = Astro.props;
+const { backgroundDark, backgroundLight, description, title } = Astro.props;
 ---
 
 <!doctype html>
-<html lang="en">
+<html
+  lang="en"
+  data-background-dark={backgroundDark}
+  data-background-light={backgroundLight}
+>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content={description} />
+    <meta
+      name="theme-color"
+      content={backgroundLight}
+      media="(prefers-color-scheme: light)"
+    />
+    <meta
+      name="theme-color"
+      content={backgroundDark}
+      media="(prefers-color-scheme: dark)"
+    />
     <title>{title}</title>
 
     <script is:inline>
-      document.documentElement.classList.add("js");
-      setTimeout(() => document.documentElement.classList.remove("js"), 3000);
+      const root = document.documentElement;
+      const background = matchMedia("(prefers-color-scheme: dark)").matches
+        ? root.dataset.backgroundDark
+        : root.dataset.backgroundLight;
+
+      if (background) root.style.setProperty("--initial-background", background);
+      root.classList.add("js");
+      setTimeout(() => root.classList.remove("js"), 3000);
     </script>
     <script>
       import "../client";
