@@ -1,0 +1,125 @@
+---
+import type { ActivityPresentation } from "../shared/activity-view";
+
+interface Props {
+  presentation: ActivityPresentation;
+}
+
+const { presentation } = Astro.props;
+---
+
+<m3e-card class="card activity-card" variant="filled">
+  <div slot="content" class="activity-content">
+    <div class="activity-header">
+      <m3e-shape name="pill" class="lead-shape">
+        <div class="shape-center">
+          <m3e-icon name="bolt_boost" variant="rounded"></m3e-icon>
+        </div>
+      </m3e-shape>
+      <m3e-icon-button
+        data-activity-link
+        class="activity-link"
+        variant="filled"
+        target="_blank"
+        rel="noreferrer"
+        href={presentation.href}
+        hidden={presentation.href === undefined}
+      >
+        <m3e-icon name="arrow_outward" variant="rounded"></m3e-icon>
+      </m3e-icon-button>
+    </div>
+    <div class="ambient-glow" aria-hidden="true"></div>
+    <div class="ambient-ring" aria-hidden="true"></div>
+    <div class="ambient-ring outer" aria-hidden="true"></div>
+    <img
+      data-activity-artwork
+      class="activity-artwork"
+      src={presentation.imageUrl}
+      hidden={presentation.imageUrl === undefined}
+      alt=""
+      aria-hidden="true"
+    />
+    <div
+      data-active-state
+      class="active-content"
+      hidden={!presentation.active}
+    >
+      <m3e-heading
+        data-activity-name
+        class="activity-name"
+        level="3"
+        variant="headline"
+        size="large"
+        emphasized
+      >{presentation.name}</m3e-heading>
+      <m3e-heading
+        data-activity-details
+        level="4"
+        variant="title"
+        size="small"
+        hidden={presentation.details === undefined}
+      >{presentation.details ?? ""}</m3e-heading>
+      <m3e-icon
+        data-activity-icon
+        class="activity-icon"
+        name={presentation.icon}
+        variant="rounded"
+        aria-hidden="true"
+      ></m3e-icon>
+      <div class="duration">
+        <div class="duration-row">
+          <div>
+            <m3e-heading
+              data-activity-label
+              class="duration-label"
+              level="4"
+              variant="label"
+              size="small"
+            >{presentation.label}</m3e-heading>
+            <div class="elapsed-row">
+              <span data-elapsed class="duration-value"
+                >{presentation.elapsed}</span
+              >
+              <span
+                data-total
+                class="duration-value"
+                hidden={presentation.total === undefined}
+                >{presentation.total === undefined
+                  ? ""
+                  : `/ ${presentation.total}`}</span
+              >
+              <span class="elapsed-suffix">elapsed</span>
+            </div>
+          </div>
+        </div>
+        <m3e-linear-progress-indicator
+          data-progress
+          class="activity-progress"
+          variant="wavy"
+          mode={presentation.progressMode}
+          value={presentation.progressValue}
+        ></m3e-linear-progress-indicator>
+      </div>
+    </div>
+    <div data-idle-state class="idle-copy" hidden={presentation.active}>
+      <m3e-heading
+        level="3"
+        variant="headline"
+        size="large"
+        emphasized
+      >taking a breather</m3e-heading>
+      <m3e-heading
+        class="subtitle"
+        level="4"
+        variant="title"
+        size="small"
+      >not doing anything right now :p</m3e-heading>
+      <m3e-icon
+        class="activity-icon"
+        name="coffee"
+        variant="rounded"
+        aria-hidden="true"
+      ></m3e-icon>
+    </div>
+  </div>
+</m3e-card>

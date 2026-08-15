@@ -1,7 +1,6 @@
-import { cyrlat } from "../shared/cyrlat";
-import { ACTIVITY_THEMES } from "../shared/profile";
-import { calculateProgress, formatTimeElapsed } from "../shared/time";
-import type { Activity, PresenceView } from "../shared/types";
+import { getActivityPresentation } from "../shared/activity-view";
+import type { PresenceView } from "../shared/types";
+import { safeHttpUrl } from "../shared/url";
 
 export type ActivityControllerOptions = {
   now?: () => number;
@@ -55,18 +54,11 @@ function activityElements(root: ParentNode): ActivityElements {
   };
 }
 
-function safeHttpUrl(value: string | undefined): string | undefined {
-  if (value === undefined) return undefined;
-
-  try {
-    const url = new URL(value);
-    return url.protocol === "http:" || url.protocol === "https:" ? url.href : undefined;
-  } catch {
-    return undefined;
-  }
-}
-
-function updateOptionalUrl(element: Element, attribute: "href" | "src", value: string | undefined): void {
+function updateOptionalUrl(
+  element: Element,
+  attribute: "href" | "src",
+  value: string | undefined,
+): void {
   element.removeAttribute(attribute);
   const url = safeHttpUrl(value);
   if (url === undefined) {
@@ -84,18 +76,12 @@ function updateAvatar(element: Element, value: string): void {
   if (url !== undefined) element.setAttribute("src", url);
 }
 
-function updateActivityDetails(element: Element, details: string | undefined): void {
-  element.textContent = details ? cyrlat(details) : "";
+function updateActivityDetails(
+  element: Element,
+  details: string | undefined,
+): void {
+  element.textContent = details ?? "";
   element.toggleAttribute("hidden", !details);
-}
-
-function elapsedFor(activity: Activity, now: number): number {
-  return Math.max(0, now - activity.startedAt);
-}
-
-function totalFor(activity: Activity): number | undefined {
-  if (activity.endsAt === undefined) return undefined;
-  return Math.max(0, activity.endsAt - activity.startedAt);
 }
 
 export function createActivityController(
@@ -111,52 +97,31 @@ export function createActivityController(
   let disposed = false;
 
   function tick(tickNow = now()): void {
-    const activity = presence.activity;
-    if (activity === undefined) {
-      elements.elapsed.textContent = formatTimeElapsed(0);
-      elements.total.setAttribute("hidden", "");
-      elements.progress.setAttribute("mode", "indeterminate");
-      elements.progress.setAttribute("value", "0");
-      return;
-    }
-
-    const elapsed = elapsedFor(activity, tickNow);
-    const total = totalFor(activity);
-    const hasRemainingTotal = total !== undefined && total > elapsed;
-    const progress = hasRemainingTotal ? calculateProgress(activity, tickNow) : undefined;
-
-    elements.elapsed.textContent = formatTimeElapsed(elapsed);
-    elements.total.textContent = `/ ${formatTimeElapsed(total ?? 0)}`;
-    elements.total.toggleAttribute("hidden", !hasRemainingTotal);
-    elements.progress.setAttribute("mode", hasRemainingTotal ? "determinate" : "indeterminate");
-    elements.progress.setAttribute("value", String(progress ?? 0));
+    const view = getActivityPresentation(presence, tickNow);
+    elements.elapsed.textContent = view.elapsed;
+    elements.total.textContent = view.total === undefined ? "" : `/ ${view.total}`;
+    elements.total.toggleAttribute("hidden", view.total === undefined);
+    elements.progress.setAttribute("mode", view.progressMode);
+    elements.progress.setAttribute("value", String(view.progressValue));
   }
 
   function setPresence(next: PresenceView): void {
     presence = next;
-    updateAvatar(elements.avatar, presence.avatarUrl);
-
-    const activity = presence.activity;
-    if (activity === undefined) {
-      elements.activeState.setAttribute("hidden", "");
-      elements.idleState.removeAttribute("hidden");
-      elements.name.textContent = "";
-      updateActivityDetails(elements.details, undefined);
-      updateOptionalUrl(elements.link, "href", undefined);
-      updateOptionalUrl(elements.artwork, "src", undefined);
-      tick();
-      return;
-    }
-
-    elements.activeState.removeAttribute("hidden");
-    elements.idleState.setAttribute("hidden", "");
-    elements.name.textContent = cyrlat(activity.name);
-    updateActivityDetails(elements.details, activity.details);
-    elements.icon.setAttribute("name", ACTIVITY_THEMES[activity.type].icon);
-    elements.label.textContent = ACTIVITY_THEMES[activity.type].label;
-    updateOptionalUrl(elements.link, "href", activity.href);
-    updateOptionalUrl(elements.artwork, "src", activity.imageUrl);
-    tick();
+    const view = getActivityPresentation(presence, now());
+    updateAvatar(elements.avatar, view.avatarUrl);
+    elements.activeState.toggleAttribute("hidden", !view.active);
+    elements.idleState.toggleAttribute("hidden", view.active);
+    elements.name.textContent = view.name;
+    updateActivityDetails(elements.details, view.details);
+    elements.icon.setAttribute("name", view.icon);
+    elements.label.textContent = view.label;
+    updateOptionalUrl(elements.link, "href", view.href);
+    updateOptionalUrl(elements.artwork, "src", view.imageUrl);
+    elements.elapsed.textContent = view.elapsed;
+    elements.total.textContent = view.total === undefined ? "" : `/ ${view.total}`;
+    elements.total.toggleAttribute("hidden", view.total === undefined);
+    elements.progress.setAttribute("mode", view.progressMode);
+    elements.progress.setAttribute("value", String(view.progressValue));
   }
 
   const timer = setIntervalFn(tick, 1_000);

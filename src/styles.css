@@ -24,6 +24,9 @@ body {
     "GRAD" 0,
     "ROND" 0;
 }
+presence-controller {
+  display: contents;
+}
 .page-theme {
   display: block;
   min-height: 100svh;

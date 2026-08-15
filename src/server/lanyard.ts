@@ -1,8 +1,10 @@
 import { connectToLanyard } from "../shared/lanyard-socket";
-import { FALLBACK_AVATAR_URL, DISCORD_USER_ID } from "../shared/profile";
+import {
+  FALLBACK_AVATAR_URL,
+  DISCORD_USER_ID,
+  LANYARD_SOCKET_URL,
+} from "../shared/profile";
 import type { PresenceView } from "../shared/types";
-
-const LANYARD_SOCKET_URL = "wss://api.lanyard.rest/socket";
 
 export type PresenceSource = {
   getPresence(): Promise<PresenceView>;
@@ -22,6 +24,7 @@ export type PresenceServiceOptions = {
     "setInterval" | "clearInterval" | "setTimeout" | "clearTimeout"
   >;
   onError?: (error: unknown) => void;
+  initialWaitMs?: number;
 };
 
 export function createPresenceService({
@@ -31,8 +34,15 @@ export function createPresenceService({
   WebSocketCtor,
   scheduler,
   onError,
+  initialWaitMs = 750,
 }: PresenceServiceOptions = {}): PresenceService {
   let presence: PresenceView = fallback;
+  let hasReceivedPresence = false;
+  let resolveInitialPresence: (() => void) | undefined;
+  const initialPresence = new Promise<void>((resolve) => {
+    resolveInitialPresence = resolve;
+  });
+  const activeScheduler = scheduler ?? globalThis;
 
   const disconnect = connectToLanyard({
     userId,
@@ -42,11 +52,23 @@ export function createPresenceService({
     onError,
     onPresence(nextPresence) {
       presence = nextPresence;
+      if (!hasReceivedPresence) {
+        hasReceivedPresence = true;
+        resolveInitialPresence?.();
+      }
     },
   });
 
   return {
     async getPresence() {
+      if (!hasReceivedPresence && initialWaitMs > 0) {
+        await Promise.race([
+          initialPresence,
+          new Promise<void>((resolve) => {
+            activeScheduler.setTimeout(resolve, initialWaitMs);
+          }),
+        ]);
+      }
       return presence;
     },
 
@@ -54,4 +76,23 @@ export function createPresenceService({
       disconnect();
     },
   };
+}
+
+let sharedPresenceService: PresenceService | undefined;
+
+export function getPresenceService(): PresenceService {
+  sharedPresenceService ??= createPresenceService({
+    onError(error) {
+      console.error("Lanyard server socket error", error);
+    },
+  });
+
+  return sharedPresenceService;
+}
+
+if (import.meta.hot) {
+  import.meta.hot.dispose(() => {
+    sharedPresenceService?.dispose();
+    sharedPresenceService = undefined;
+  });
 }

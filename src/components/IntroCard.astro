@@ -1,0 +1,54 @@
+---
+import { MONKEYTYPE_PROFILE_URL } from "../shared/profile";
+import type { ActivityPresentation } from "../shared/activity-view";
+
+interface Props {
+  presentation: ActivityPresentation;
+}
+
+const { presentation } = Astro.props;
+---
+
+<m3e-card class="card intro-card" variant="filled">
+  <div slot="content" class="intro-content">
+    <div class="intro-copy">
+      <div class="intro-top">
+        <m3e-shape name="4-leaf-clover" class="lead-shape">
+          <div class="shape-center">
+            <m3e-icon name="waving_hand" variant="rounded"></m3e-icon>
+          </div>
+        </m3e-shape>
+        <m3e-heading
+          class="intro-heading"
+          level="2"
+          variant="display"
+          size="large"
+          emphasized
+        >hi! i'm <span class="intro-name">logix.lol</span></m3e-heading>
+      </div>
+      <p class="intro-blurb">
+        <a
+          class="certified-link"
+          href={MONKEYTYPE_PROFILE_URL}
+          target="_blank"
+          rel="noreferrer"
+        >Certified<m3e-icon
+            name="arrow_outward"
+            variant="rounded"
+          ></m3e-icon></a
+        >professional keyboard user
+      </p>
+    </div>
+    <m3e-shape name="7-sided-cookie" class="avatar-shape">
+      <m3e-avatar>
+        <img
+          data-avatar
+          width="512"
+          height="512"
+          src={presentation.avatarUrl}
+          alt="logix.lol"
+        />
+      </m3e-avatar>
+    </m3e-shape>
+  </div>
+</m3e-card>

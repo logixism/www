@@ -1,7 +1,9 @@
 import sharp from "sharp";
 
-export async function getAverageImageColorServer(url: string): Promise<string> {
-  const response = await fetch(url);
+const colorCache = new Map<string, Promise<string>>();
+
+async function deriveAverageImageColor(url: string): Promise<string> {
+  const response = await fetch(url, { signal: AbortSignal.timeout(2_000) });
 
   if (!response.ok) {
     throw new Error(
@@ -52,4 +54,16 @@ export async function getAverageImageColorServer(url: string): Promise<string> {
     .join("");
 
   return `#${color}`;
+}
+
+export function getAverageImageColorServer(url: string): Promise<string> {
+  const cached = colorCache.get(url);
+  if (cached !== undefined) return cached;
+
+  const pending = deriveAverageImageColor(url).catch((error: unknown) => {
+    colorCache.delete(url);
+    throw error;
+  });
+  colorCache.set(url, pending);
+  return pending;
 }

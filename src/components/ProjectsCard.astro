@@ -1,0 +1,41 @@
+---
+import { PROJECTS } from "../shared/profile";
+---
+
+<m3e-card class="card projects-card" variant="filled">
+  <div slot="content" class="card-content">
+    <div class="section-top">
+      <m3e-shape name="slanted" class="lead-shape">
+        <div class="shape-center">
+          <m3e-icon name="code" variant="rounded"></m3e-icon>
+        </div>
+      </m3e-shape>
+      <m3e-heading
+        class="section-heading"
+        level="2"
+        variant="headline"
+        size="medium"
+        emphasized
+      >stuff I worked on</m3e-heading>
+    </div>
+    <m3e-action-list class="action-list" variant="segmented" aria-label="Things">
+      {
+        PROJECTS.map((project) => (
+          <m3e-list-action
+            href={project.href}
+            target="_blank"
+            rel="noreferrer"
+          >
+            <m3e-icon
+              name={project.icon}
+              variant="rounded"
+              slot="leading"
+            />
+            {project.label}
+            <span slot="supporting-text">{project.description}</span>
+          </m3e-list-action>
+        ))
+      }
+    </m3e-action-list>
+  </div>
+</m3e-card>

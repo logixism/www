@@ -1,0 +1,46 @@
+---
+import ActivityCard from "../components/ActivityCard.astro";
+import IntroCard from "../components/IntroCard.astro";
+import ProjectsCard from "../components/ProjectsCard.astro";
+import SocialsCard from "../components/SocialsCard.astro";
+import PageLayout from "../layouts/PageLayout.astro";
+import { getAverageImageColorServer } from "../server/image-color";
+import { getPresenceService } from "../server/lanyard";
+import { getActivityPresentation } from "../shared/activity-view";
+import { LANYARD_SOCKET_URL } from "../shared/profile";
+
+const presence = await getPresenceService().getPresence();
+const presentation = getActivityPresentation(presence);
+let themeColor = "#6750a4";
+
+try {
+  themeColor = await getAverageImageColorServer(presentation.avatarUrl);
+} catch (error) {
+  console.error("Could not derive server-rendered avatar theme color", error);
+}
+
+const bootstrapState = JSON.stringify({
+  presence,
+  socketUrl: LANYARD_SOCKET_URL,
+});
+---
+
+<PageLayout title="logix" description="my cool website">
+  <presence-controller data-state={bootstrapState}>
+    <m3e-theme
+      class="page-theme"
+      color={themeColor}
+      scheme="auto"
+      motion="expressive"
+    >
+      <main class="site-main">
+        <div class="card-grid">
+          <IntroCard presentation={presentation} />
+          <ActivityCard presentation={presentation} />
+          <ProjectsCard />
+          <SocialsCard />
+        </div>
+      </main>
+    </m3e-theme>
+  </presence-controller>
+</PageLayout>

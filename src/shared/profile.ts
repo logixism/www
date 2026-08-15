@@ -2,6 +2,7 @@ import type { ActivityTheme, ActivityType, Project, SocialLink } from "./types";
 
 export const MONKEYTYPE_PROFILE_URL = "https://monkeytype.com/profile/logixlol";
 export const DISCORD_USER_ID = "804066391614423061";
+export const LANYARD_SOCKET_URL = "wss://api.lanyard.rest/socket";
 export const FALLBACK_AVATAR_URL =
   "https://api.lanyard.rest/804066391614423061.webp";
 
