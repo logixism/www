@@ -1,5 +1,6 @@
 ---
 import "../styles.css";
+import { INITIAL_THEME_SCRIPT } from "../shared/initial-theme";
 
 interface Props {
   backgroundDark: string;
@@ -33,16 +34,7 @@ const { backgroundDark, backgroundLight, description, title } = Astro.props;
     />
     <title>{title}</title>
 
-    <script is:inline>
-      const root = document.documentElement;
-      const background = matchMedia("(prefers-color-scheme: dark)").matches
-        ? root.dataset.backgroundDark
-        : root.dataset.backgroundLight;
-
-      if (background) root.style.setProperty("--initial-background", background);
-      root.classList.add("js");
-      setTimeout(() => root.classList.remove("js"), 3000);
-    </script>
+    <script is:inline set:html={INITIAL_THEME_SCRIPT}></script>
     <script>
       import "../client";
     </script>

@@ -1,5 +1,11 @@
 import vercel from "@astrojs/vercel";
 import { defineConfig } from "astro/config";
+import { createHash } from "node:crypto";
+import { INITIAL_THEME_SCRIPT } from "./src/shared/initial-theme";
+
+const initialThemeScriptHash = `sha256-${createHash("sha256")
+  .update(INITIAL_THEME_SCRIPT)
+  .digest("base64")}` as `sha256-${string}`;
 
 export default defineConfig({
   output: "server",
@@ -33,6 +39,10 @@ export default defineConfig({
       ],
       styleDirective: {
         resources: ["'self'", "https://fonts.googleapis.com"],
+      },
+      scriptDirective: {
+        // Astro does not automatically hash scripts marked `is:inline`.
+        hashes: [initialThemeScriptHash],
       },
     },
   },
