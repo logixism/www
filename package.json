@@ -11,11 +11,13 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
+    "test": "bun test",
     "typecheck": "astro check",
     "lint": "oxlint src astro.config.ts",
     "check": "bun run typecheck && bun run lint && bun run build"
   },
   "dependencies": {
+    "@api-wrappers/igdb-wrapper": "^1.1.1",
     "@astrojs/vercel": "^11.0.5",
     "@m3e/icons": "1.0.12",
     "@m3e/web": "2.7.4",
@@ -23,10 +25,12 @@
     "astro": "7.2.2",
     "lit": "3.3.3",
     "sharp": "^0.35.3",
-    "tslib": "2.8.1"
+    "tslib": "2.8.1",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@astrojs/check": "0.9.10",
+    "@types/bun": "^1.3.14",
     "oxlint": "1.76.0",
     "typescript": "6.0.2"
   }

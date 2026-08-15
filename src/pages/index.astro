@@ -5,9 +5,8 @@ import ProjectsCard from "../components/ProjectsCard.astro";
 import SocialsCard from "../components/SocialsCard.astro";
 import PageLayout from "../layouts/PageLayout.astro";
 import { getAverageImageColorServer } from "../server/image-color";
-import { getPresenceService } from "../server/lanyard";
+import { getPresenceService } from "../server/presence";
 import { getActivityPresentation } from "../shared/activity-view";
-import { LANYARD_SOCKET_URL } from "../shared/profile";
 import { getThemeBackgrounds } from "../shared/theme";
 
 const presence = await getPresenceService().getPresence();
@@ -22,10 +21,7 @@ try {
 
 const themeBackgrounds = getThemeBackgrounds(themeColor);
 
-const bootstrapState = JSON.stringify({
-  presence,
-  socketUrl: LANYARD_SOCKET_URL,
-});
+const bootstrapState = JSON.stringify({ presence });
 ---
 
 <PageLayout

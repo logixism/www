@@ -1,12 +1,10 @@
 import { createActivityController } from "./activity-view";
 import { getAverageImageColor } from "./image-color";
-import { connectToLanyard } from "../shared/lanyard-socket";
-import { DISCORD_USER_ID } from "../shared/profile";
+import { connectToPresenceEvents } from "./presence-events";
 import type { PresenceView } from "../shared/types";
 
 type BootstrapState = {
   presence: PresenceView;
-  socketUrl: string;
 };
 
 class PresenceControllerElement extends HTMLElement {
@@ -38,9 +36,7 @@ class PresenceControllerElement extends HTMLElement {
           });
       };
 
-      const disconnect = connectToLanyard({
-        userId: DISCORD_USER_ID,
-        url: state.socketUrl,
+      const disconnect = connectToPresenceEvents({
         onPresence(presence) {
           activity.setPresence(presence);
           if (presence.avatarUrl !== avatarUrl) {
@@ -49,7 +45,7 @@ class PresenceControllerElement extends HTMLElement {
           }
         },
         onError(error) {
-          console.error("Lanyard browser socket error", error);
+          console.error("Could not apply live presence update", error);
         },
       });
 
