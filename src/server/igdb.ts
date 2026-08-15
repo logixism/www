@@ -3,6 +3,16 @@ import type { PresenceView } from "../shared/types";
 export type GameSearchResult = {
   name?: string;
   cover?: { image_id?: string };
+  external_games?: Array<{
+    external_game_source?: { name?: string };
+    uid?: string;
+    url?: string;
+  }>;
+};
+
+type GameMetadata = {
+  imageUrl?: string;
+  href?: string;
 };
 
 export type IgdbGameArtworkEnricherOptions = {
@@ -20,6 +30,21 @@ function normalizeGameName(name: string): string {
     .trim();
 }
 
+function getSteamHref(game: GameSearchResult | undefined): string | undefined {
+  const steam = game?.external_games?.find(
+    (externalGame) =>
+      externalGame.external_game_source?.name?.toLocaleLowerCase("en") ===
+      "steam",
+  );
+  const url = steam?.url?.trim();
+  if (url) return url;
+
+  const uid = steam?.uid?.trim();
+  return uid !== undefined && /^\d+$/.test(uid)
+    ? `https://store.steampowered.com/app/${uid}`
+    : undefined;
+}
+
 export function createIgdbGameArtworkEnricher({
   searchGames,
   buildArtworkUrl,
@@ -27,14 +52,14 @@ export function createIgdbGameArtworkEnricher({
 }: IgdbGameArtworkEnricherOptions): (
   presence: PresenceView,
 ) => Promise<PresenceView> {
-  const artwork = new Map<string, Promise<string | undefined>>();
+  const metadata = new Map<string, Promise<GameMetadata>>();
 
   return async (presence) => {
     const activity = presence.activity;
     if (activity?.type !== "playing") return presence;
 
     const key = normalizeGameName(activity.name);
-    let pending = artwork.get(key);
+    let pending = metadata.get(key);
     if (pending === undefined) {
       pending = searchGames(activity.name)
         .then((games) => {
@@ -43,18 +68,29 @@ export function createIgdbGameArtworkEnricher({
               game.name !== undefined && normalizeGameName(game.name) === key,
           );
           const imageId = match?.cover?.image_id;
-          return imageId === undefined ? undefined : buildArtworkUrl(imageId);
+          return {
+            imageUrl:
+              imageId === undefined ? undefined : buildArtworkUrl(imageId),
+            href: getSteamHref(match),
+          };
         })
         .catch((error: unknown) => {
-          artwork.delete(key);
+          metadata.delete(key);
           onError?.(error);
-          return undefined;
+          return {};
         });
-      artwork.set(key, pending);
+      metadata.set(key, pending);
     }
 
-    const imageUrl = await pending;
-    if (imageUrl === undefined) return presence;
-    return { ...presence, activity: { ...activity, imageUrl } };
+    const { imageUrl, href } = await pending;
+    if (imageUrl === undefined && href === undefined) return presence;
+    return {
+      ...presence,
+      activity: {
+        ...activity,
+        ...(imageUrl === undefined ? {} : { imageUrl }),
+        ...(href === undefined ? {} : { href }),
+      },
+    };
   };
 }

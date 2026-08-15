@@ -117,13 +117,9 @@ export function getPresenceService(): PresenceService {
     searchGames: async (name) =>
       igdb.games
         .search(name)
-        .fields("name, cover.image_id")
-        .select((game) => ({
-          name: game.name,
-          cover: {
-            image_id: game.cover?.image_id,
-          },
-        }))
+        .fields(
+          "name, cover.image_id, external_games.external_game_source.name, external_games.uid, external_games.url",
+        )
         .limit(10)
         .execute(),
     buildArtworkUrl: (imageId) =>

@@ -18,8 +18,18 @@ describe("IGDB game artwork enrichment", () => {
       async searchGames() {
         searches += 1;
         return [
-          { name: "Risk of Rain Returns", cover: { imageId: "wrong" } },
-          { name: "Risk of Rain 2", cover: { imageId: "right" } },
+          { name: "Risk of Rain Returns", cover: { image_id: "wrong" } },
+          {
+            name: "Risk of Rain 2",
+            cover: { image_id: "right" },
+            external_games: [
+              {
+                external_game_source: { name: "Steam" },
+                uid: "632360",
+                url: "https://store.steampowered.com/app/632360",
+              },
+            ],
+          },
         ];
       },
       buildArtworkUrl: (imageId) =>
@@ -35,7 +45,56 @@ describe("IGDB game artwork enrichment", () => {
     expect(second.activity?.imageUrl).toBe(
       "https://images.igdb.com/right.jpg",
     );
+    expect(first.activity?.href).toBe(
+      "https://store.steampowered.com/app/632360",
+    );
     expect(searches).toBe(1);
+  });
+
+  test("builds a Steam href from its external-game UID", async () => {
+    const enrich = createIgdbGameArtworkEnricher({
+      async searchGames() {
+        return [
+          {
+            name: "Risk of Rain 2",
+            external_games: [
+              {
+                external_game_source: { name: "Steam" },
+                uid: "632360",
+              },
+            ],
+          },
+        ];
+      },
+      buildArtworkUrl: () =>
+        "https://images.igdb.com/unreachable.jpg",
+    });
+
+    expect((await enrich(playing)).activity?.href).toBe(
+      "https://store.steampowered.com/app/632360",
+    );
+  });
+
+  test("does not add an href without a Steam external game", async () => {
+    const enrich = createIgdbGameArtworkEnricher({
+      async searchGames() {
+        return [
+          {
+            name: "Risk of Rain 2",
+            external_games: [
+              {
+                external_game_source: { name: "Epic Games Store" },
+                url: "https://store.epicgames.com/p/risk-of-rain-2",
+              },
+            ],
+          },
+        ];
+      },
+      buildArtworkUrl: () =>
+        "https://images.igdb.com/unreachable.jpg",
+    });
+
+    expect((await enrich(playing)).activity?.href).toBeUndefined();
   });
 
   test("does not query IGDB for non-playing activities", async () => {
