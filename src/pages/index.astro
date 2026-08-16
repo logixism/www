@@ -6,7 +6,7 @@ import SocialsCard from "../components/SocialsCard.astro";
 import PageLayout from "../layouts/PageLayout.astro";
 import { getAverageImageColorServer } from "../server/image-color";
 import { getPresenceService } from "../server/presence";
-import { getActivityPresentation } from "../shared/activity-view";
+import { getActivityPresentation } from "../shared/activity-presentation";
 import { getThemeBackgrounds } from "../shared/theme";
 
 const presence = await getPresenceService().getPresence();

@@ -1,4 +1,4 @@
-import { getActivityPresentation } from "../shared/activity-view";
+import { getActivityPresentation } from "../shared/activity-presentation";
 import type { PresenceView } from "../shared/types";
 import { safeHttpUrl } from "../shared/url";
 

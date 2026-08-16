@@ -1,5 +1,5 @@
-import { DISCORD_USER_ID } from "./profile";
-import type { Activity, ActivityType, PresenceView } from "./types";
+import { DISCORD_USER_ID } from "../../shared/profile";
+import type { Activity, ActivityType, PresenceView } from "../../shared/types";
 
 const CODING_ACTIVITY_NAME =
   /(?:code|visual studio|jetbrains|intellij|webstorm|pycharm|rider|zed)/i;

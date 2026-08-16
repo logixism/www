@@ -1,6 +1,6 @@
-import { connectToLanyard } from "../shared/lanyard-socket";
-import { DISCORD_USER_ID, LANYARD_SOCKET_URL } from "../shared/profile";
-import type { PresenceProvider } from "./presence";
+import { DISCORD_USER_ID, LANYARD_SOCKET_URL } from "../../shared/profile";
+import type { PresenceProvider } from "../presence/service";
+import { connectToLanyard } from "./socket";
 
 export type LanyardPresenceProviderOptions = {
   userId?: string;

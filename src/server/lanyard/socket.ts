@@ -1,5 +1,5 @@
-import { mapLanyardPresence } from "../shared/presence";
-import type { PresenceView } from "../shared/types";
+import type { PresenceView } from "../../shared/types";
+import { mapLanyardPresence } from "./mapper";
 
 type SocketOptions = {
   userId: string;

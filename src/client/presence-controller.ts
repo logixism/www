@@ -1,4 +1,4 @@
-import { createActivityController } from "./activity-view";
+import { createActivityController } from "./activity-controller";
 import { getAverageImageColor } from "./image-color";
 import { connectToPresenceEvents } from "./presence-events";
 import type { PresenceView } from "../shared/types";
