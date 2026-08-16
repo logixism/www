@@ -20,6 +20,7 @@ export type PresenceServiceOptions = {
   enrich?: (presence: PresenceView) => Promise<PresenceView>;
   fallback?: PresenceView;
   initialWaitMs?: number;
+  now?: () => number;
   scheduler?: Pick<typeof globalThis, "setTimeout" | "clearTimeout">;
   onError?: (error: unknown) => void;
 };
@@ -29,10 +30,14 @@ export function createPresenceService({
   enrich,
   fallback = { avatarUrl: FALLBACK_AVATAR_URL },
   initialWaitMs = 750,
+  now = Date.now,
   scheduler = globalThis,
   onError,
 }: PresenceServiceOptions): PresenceService {
   let current = fallback;
+  let lastActivity = fallback.activity ?? fallback.lastActivity;
+  let activityGoneAt = fallback.activityGoneAt;
+  let hadCurrentActivity = fallback.activity !== undefined;
   let receivedInitial = false;
   let generation = 0;
   let disposed = false;
@@ -47,9 +52,28 @@ export function createPresenceService({
     for (const listener of listeners) listener(presence);
   };
 
+  const recordActivity = (presence: PresenceView): PresenceView => {
+    if (presence.activity !== undefined) {
+      lastActivity = presence.activity;
+      activityGoneAt = undefined;
+      hadCurrentActivity = true;
+      return presence;
+    }
+
+    if (hadCurrentActivity) activityGoneAt = now();
+    hadCurrentActivity = false;
+    if (lastActivity === undefined) return presence;
+
+    return {
+      ...presence,
+      lastActivity,
+      ...(activityGoneAt === undefined ? {} : { activityGoneAt }),
+    };
+  };
+
   const disconnect = provider.subscribe((presence) => {
     const updateGeneration = ++generation;
-    publish(presence);
+    publish(recordActivity(presence));
     if (!receivedInitial) {
       receivedInitial = true;
       resolveInitial();
@@ -65,6 +89,7 @@ export function createPresenceService({
         ) {
           return;
         }
+        if (enriched.activity !== undefined) lastActivity = enriched.activity;
         publish(enriched);
       })
       .catch((error: unknown) => onError?.(error));

@@ -10,7 +10,12 @@ export type Activity = {
   endsAt?: number;
 };
 
-export type PresenceView = { avatarUrl: string; activity?: Activity };
+export type PresenceView = {
+  avatarUrl: string;
+  activity?: Activity;
+  lastActivity?: Activity;
+  activityGoneAt?: number;
+};
 export type ActivityTheme = { label: string; icon: string };
 export type Project = {
   icon: string;

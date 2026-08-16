@@ -25,6 +25,7 @@ type ActivityElements = {
   icon: Element;
   label: Element;
   elapsed: Element;
+  elapsedSuffix: Element;
   total: Element;
   progress: Element;
 };
@@ -49,6 +50,7 @@ function activityElements(root: ParentNode): ActivityElements {
     icon: required(root, "[data-activity-icon]"),
     label: required(root, "[data-activity-label]"),
     elapsed: required(root, "[data-elapsed]"),
+    elapsedSuffix: required(root, "[data-elapsed-suffix]"),
     total: required(root, "[data-total]"),
     progress: required(root, "[data-progress]"),
   };
@@ -99,10 +101,12 @@ export function createActivityController(
   function tick(tickNow = now()): void {
     const view = getActivityPresentation(presence, tickNow);
     elements.elapsed.textContent = view.elapsed;
+    elements.elapsedSuffix.textContent = view.timeSuffix;
     elements.total.textContent = view.total === undefined ? "" : `/ ${view.total}`;
     elements.total.toggleAttribute("hidden", view.total === undefined);
     elements.progress.setAttribute("mode", view.progressMode);
     elements.progress.setAttribute("value", String(view.progressValue));
+    elements.progress.toggleAttribute("hidden", !view.showProgress);
   }
 
   function setPresence(next: PresenceView): void {
@@ -118,10 +122,12 @@ export function createActivityController(
     updateOptionalUrl(elements.link, "href", view.href);
     updateOptionalUrl(elements.artwork, "src", view.imageUrl);
     elements.elapsed.textContent = view.elapsed;
+    elements.elapsedSuffix.textContent = view.timeSuffix;
     elements.total.textContent = view.total === undefined ? "" : `/ ${view.total}`;
     elements.total.toggleAttribute("hidden", view.total === undefined);
     elements.progress.setAttribute("mode", view.progressMode);
     elements.progress.setAttribute("value", String(view.progressValue));
+    elements.progress.toggleAttribute("hidden", !view.showProgress);
   }
 
   const timer = setIntervalFn(tick, 1_000);

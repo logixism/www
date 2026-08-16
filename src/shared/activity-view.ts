@@ -16,6 +16,8 @@ export type ActivityPresentation = {
   name: string;
   progressMode: "determinate" | "indeterminate";
   progressValue: number;
+  showProgress: boolean;
+  timeSuffix: "ago" | "elapsed";
   total?: string;
 };
 
@@ -24,7 +26,8 @@ export function getActivityPresentation(
   now = Date.now(),
 ): ActivityPresentation {
   const avatarUrl = safeHttpUrl(presence.avatarUrl) ?? FALLBACK_AVATAR_URL;
-  const activity = presence.activity;
+  const isCurrent = presence.activity !== undefined;
+  const activity = presence.activity ?? presence.lastActivity;
 
   if (activity === undefined) {
     return {
@@ -36,12 +39,17 @@ export function getActivityPresentation(
       name: "",
       progressMode: "indeterminate",
       progressValue: 0,
+      showProgress: false,
+      timeSuffix: "elapsed",
     };
   }
 
-  const elapsed = Math.max(0, now - activity.startedAt);
+  const historical = !isCurrent;
+  const elapsed = historical
+    ? Math.max(0, now - (presence.activityGoneAt ?? now))
+    : Math.max(0, now - activity.startedAt);
   const total =
-    activity.endsAt === undefined
+    historical || activity.endsAt === undefined
       ? undefined
       : Math.max(0, activity.endsAt - activity.startedAt);
   const hasRemainingTotal = total !== undefined && total > elapsed;
@@ -62,10 +70,14 @@ export function getActivityPresentation(
     ...(href === undefined ? {} : { href }),
     icon: theme.icon,
     ...(imageUrl === undefined ? {} : { imageUrl }),
-    label: theme.label,
+    label: historical
+      ? `Was ${theme.label.replace(/ for$/, "").toLowerCase()} last`
+      : theme.label,
     name: cyrlat(activity.name),
     progressMode: hasRemainingTotal ? "determinate" : "indeterminate",
     progressValue: progress ?? 0,
+    showProgress: isCurrent,
+    timeSuffix: historical ? "ago" : "elapsed",
     ...(hasRemainingTotal ? { total: formatTimeElapsed(total) } : {}),
   };
 }
