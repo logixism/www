@@ -32,7 +32,7 @@ export default defineConfig({
         "default-src 'none'",
         "connect-src 'self'",
         "font-src https://fonts.gstatic.com",
-        "img-src 'self' data: https://api.lanyard.rest https://cdn.discordapp.com https://i.scdn.co https://images.igdb.com",
+        "img-src 'self' data: https://api.lanyard.rest https://cdn.discordapp.com https://lastfm.freetls.fastly.net https://lastfm-img.freetls.fastly.net https://images.igdb.com",
         "base-uri 'none'",
         "form-action 'none'",
         "object-src 'none'",

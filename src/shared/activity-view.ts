@@ -52,10 +52,8 @@ export function getActivityPresentation(
     historical || activity.endsAt === undefined
       ? undefined
       : Math.max(0, activity.endsAt - activity.startedAt);
-  const hasRemainingTotal = total !== undefined && total > elapsed;
-  const progress = hasRemainingTotal
-    ? calculateProgress(activity, now)
-    : undefined;
+  const hasTotal = total !== undefined && total > 0;
+  const progress = hasTotal ? calculateProgress(activity, now) : undefined;
   const theme = ACTIVITY_THEMES[activity.type];
   const href = safeHttpUrl(activity.href);
   const imageUrl = safeHttpUrl(activity.imageUrl);
@@ -74,10 +72,10 @@ export function getActivityPresentation(
       ? `Was ${theme.label.replace(/ for$/, "").toLowerCase()} last`
       : theme.label,
     name: cyrlat(activity.name),
-    progressMode: hasRemainingTotal ? "determinate" : "indeterminate",
+    progressMode: hasTotal ? "determinate" : "indeterminate",
     progressValue: progress ?? 0,
     showProgress: isCurrent,
     timeSuffix: historical ? "ago" : "elapsed",
-    ...(hasRemainingTotal ? { total: formatTimeElapsed(total) } : {}),
+    ...(hasTotal ? { total: formatTimeElapsed(total) } : {}),
   };
 }

@@ -37,40 +37,6 @@ function getAvatarUrl(input: UnknownRecord): string | undefined {
   return `https://cdn.discordapp.com/avatars/${DISCORD_USER_ID}/${avatar}.webp?quality=lossless`;
 }
 
-function getSpotifyActivity(input: UnknownRecord): Activity | undefined {
-  const spotify = input.spotify;
-  if (!isRecord(spotify)) return undefined;
-
-  const song = getString(spotify, "song");
-  const artist = getString(spotify, "artist");
-  const trackId = getString(spotify, "track_id");
-  const imageUrl = getString(spotify, "album_art_url");
-  const timestamps = spotify.timestamps;
-  if (
-    song === undefined ||
-    artist === undefined ||
-    trackId === undefined ||
-    imageUrl === undefined ||
-    !isRecord(timestamps)
-  ) {
-    return undefined;
-  }
-
-  const startedAt = getNumber(timestamps, "start");
-  const endsAt = getNumber(timestamps, "end");
-  if (startedAt === undefined || endsAt === undefined) return undefined;
-
-  return {
-    type: "listening",
-    name: song,
-    details: artist,
-    imageUrl,
-    href: `https://open.spotify.com/track/${trackId}`,
-    startedAt,
-    endsAt,
-  };
-}
-
 function getDiscordActivity(
   activities: unknown[],
   now: number,
@@ -78,6 +44,9 @@ function getDiscordActivity(
   let activity: UnknownRecord | undefined;
   for (const candidate of activities) {
     if (!isRecord(candidate) || candidate.type === 4) continue;
+    if (getString(candidate, "name")?.toLocaleLowerCase("en") === "spotify") {
+      continue;
+    }
     activity = candidate;
     break;
   }
@@ -111,13 +80,6 @@ export function mapLanyardPresence(
 
   const avatarUrl = getAvatarUrl(input);
   if (avatarUrl === undefined) return undefined;
-
-  if (input.listening_to_spotify === true) {
-    const activity = getSpotifyActivity(input);
-    return activity === undefined ? undefined : { avatarUrl, activity };
-  }
-
-  if (input.listening_to_spotify !== false) return undefined;
 
   const activity = getDiscordActivity(input.activities, now);
   return activity === undefined ? { avatarUrl } : { avatarUrl, activity };

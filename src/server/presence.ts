@@ -3,6 +3,10 @@ import { FALLBACK_AVATAR_URL } from "../shared/profile";
 import type { PresenceView } from "../shared/types";
 import { getServerEnv } from "./env";
 import { createIgdbGameArtworkEnricher } from "./igdb";
+import {
+  createLastFmActivityProvider,
+  type ActivityProvider,
+} from "./lastfm";
 import { createLanyardPresenceProvider } from "./lanyard";
 
 export type PresenceProvider = {
@@ -24,6 +28,40 @@ export type PresenceServiceOptions = {
   scheduler?: Pick<typeof globalThis, "setTimeout" | "clearTimeout">;
   onError?: (error: unknown) => void;
 };
+
+export function combinePresenceWithActivity(
+  provider: PresenceProvider,
+  activityProvider: ActivityProvider,
+): PresenceProvider {
+  return {
+    subscribe(listener) {
+      let presence: PresenceView | undefined;
+      let activity: PresenceView["activity"];
+
+      const publish = (): void => {
+        if (presence === undefined) return;
+        listener({
+          ...presence,
+          activity: activity ?? presence.activity,
+        });
+      };
+
+      const disconnectPresence = provider.subscribe((next) => {
+        presence = next;
+        publish();
+      });
+      const disconnectActivity = activityProvider.subscribe((next) => {
+        activity = next;
+        publish();
+      });
+
+      return () => {
+        disconnectPresence();
+        disconnectActivity();
+      };
+    },
+  };
+}
 
 export function createPresenceService({
   provider,
@@ -156,11 +194,20 @@ export function getPresenceService(): PresenceService {
 
   sharedIgdbClient = igdb;
   sharedPresenceService = createPresenceService({
-    provider: createLanyardPresenceProvider({
-      onError(error) {
-        console.error("Lanyard server socket error", error);
-      },
-    }),
+    provider: combinePresenceWithActivity(
+      createLanyardPresenceProvider({
+        onError(error) {
+          console.error("Lanyard server socket error", error);
+        },
+      }),
+      createLastFmActivityProvider({
+        apiKey: env.LASTFM_API_KEY,
+        username: env.LASTFM_USERNAME,
+        onError(error) {
+          console.error("Could not fetch Last.fm activity", error);
+        },
+      }),
+    ),
     enrich,
     onError(error) {
       console.error("Could not enrich presence", error);

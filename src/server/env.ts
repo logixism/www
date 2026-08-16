@@ -3,6 +3,8 @@ import { z } from "zod";
 const serverEnvSchema = z.object({
   TWITCH_CLIENT_ID: z.string().trim().min(1),
   TWITCH_CLIENT_SECRET: z.string().trim().min(1),
+  LASTFM_API_KEY: z.string().trim().min(1),
+  LASTFM_USERNAME: z.string().trim().min(1).default("logixism"),
 });
 
 export type ServerEnv = z.infer<typeof serverEnvSchema>;
@@ -27,6 +29,8 @@ export function getServerEnv(): ServerEnv {
   cachedEnv ??= parseServerEnv({
     TWITCH_CLIENT_ID: import.meta.env.TWITCH_CLIENT_ID,
     TWITCH_CLIENT_SECRET: import.meta.env.TWITCH_CLIENT_SECRET,
+    LASTFM_API_KEY: import.meta.env.LASTFM_API_KEY,
+    LASTFM_USERNAME: import.meta.env.LASTFM_USERNAME,
   });
   return cachedEnv;
 }
