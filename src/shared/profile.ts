@@ -29,10 +29,10 @@ export const PROJECTS: Project[] = [
 
 export const SOCIAL_LINKS: SocialLink[] = [
   {
-    icon: "github",
-    label: "GitHub",
-    href: "https://github.com/logixism",
-    handle: "logixism",
+    icon: "steam",
+    label: "Steam",
+    href: "https://store.steampowered.com/wishlist/id/logixwtf/?sort=dateadded&st=15839068991916890400",
+    handle: "/id/logixwtf",
   },
   {
     icon: "roblox",

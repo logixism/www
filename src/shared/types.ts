@@ -24,7 +24,7 @@ export type Project = {
   href: string;
 };
 export type SocialLink = {
-  icon: "github" | "roblox" | "discord";
+  icon: "github" | "roblox" | "discord" | "steam";
   label: string;
   href: string;
   handle: string;

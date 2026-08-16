@@ -19,5 +19,6 @@ import "@m3e/icons/rounded/stadia_controller";
 import "@m3e/icons/rounded/taunt";
 import "@m3e/icons/rounded/trending_up";
 import "@m3e/icons/rounded/waving_hand";
+import "@m3e/icons/rounded/featured_seasonal_and_gifts";
 
 import "./client/presence-controller";

@@ -1,4 +1,5 @@
 ---
+import { CUSTOM_ICONS } from "../client/custom-icons";
 import { PROJECTS } from "../shared/profile";
 ---
 
@@ -15,24 +16,31 @@ import { PROJECTS } from "../shared/profile";
         level="2"
         variant="headline"
         size="medium"
-        emphasized
-      >stuff I worked on</m3e-heading>
+        emphasized>stuff I worked on</m3e-heading
+      >
     </div>
-    <m3e-action-list class="action-list" variant="segmented" aria-label="Things">
+    <m3e-action-list
+      class="action-list"
+      variant="segmented"
+      aria-label="Things"
+    >
       {
         PROJECTS.map((project) => (
-          <m3e-list-action
-            href={project.href}
-            target="_blank"
-            rel="noreferrer"
-          >
-            <m3e-icon
-              name={project.icon}
-              variant="rounded"
-              slot="leading"
-            />
+          <m3e-list-action href={project.href} target="_blank" rel="noreferrer">
+            <m3e-icon name={project.icon} variant="rounded" slot="leading" />
             {project.label}
             <span slot="supporting-text">{project.description}</span>
+            {project.icon === "home" && (
+              <svg
+                class="social-icon"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                aria-hidden="true"
+                slot="trailing"
+              >
+                <path d={CUSTOM_ICONS["github"]} />
+              </svg>
+            )}
           </m3e-list-action>
         ))
       }
