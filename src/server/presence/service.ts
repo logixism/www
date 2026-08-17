@@ -1,5 +1,5 @@
 import { FALLBACK_AVATAR_URL } from "../../shared/profile";
-import type { PresenceView } from "../../shared/types";
+import type { Activity, PresenceView } from "../../shared/types";
 
 export type PresenceProvider = {
   subscribe(listener: (presence: PresenceView) => void): () => void;
@@ -26,6 +26,10 @@ export type PresenceServiceOptions = {
   onError?: (error: unknown) => void;
 };
 
+function presencesEqual(left: PresenceView, right: PresenceView): boolean {
+  return JSON.stringify(left) === JSON.stringify(right);
+}
+
 export function createPresenceService({
   provider,
   enrichers = [],
@@ -39,6 +43,7 @@ export function createPresenceService({
   let lastActivity = fallback.activity ?? fallback.lastActivity;
   let activityGoneAt = fallback.activityGoneAt;
   let hadCurrentActivity = fallback.activity !== undefined;
+  let lastProviderPresence: PresenceView | undefined;
   let receivedInitial = false;
   let generation = 0;
   let disposed = false;
@@ -49,8 +54,15 @@ export function createPresenceService({
   });
 
   const publish = (presence: PresenceView): void => {
+    if (presencesEqual(current, presence)) return;
     current = presence;
     for (const listener of listeners) listener(presence);
+  };
+
+  const resolveFirstUpdate = (): void => {
+    if (receivedInitial) return;
+    receivedInitial = true;
+    resolveInitial();
   };
 
   const recordActivity = (presence: PresenceView): PresenceView => {
@@ -86,27 +98,32 @@ export function createPresenceService({
       }
     }
 
-    if (
-      disposed ||
-      generation !== updateGeneration ||
-      enriched === presence
-    ) {
+    if (disposed || generation !== updateGeneration) {
       return;
     }
     if (enriched.activity !== undefined) lastActivity = enriched.activity;
     publish(enriched);
+    resolveFirstUpdate();
   };
 
   const disconnect = provider.subscribe((presence) => {
+    if (
+      lastProviderPresence !== undefined &&
+      presencesEqual(lastProviderPresence, presence)
+    ) {
+      return;
+    }
+    lastProviderPresence = presence;
+
     const updateGeneration = ++generation;
-    publish(recordActivity(presence));
-    if (!receivedInitial) {
-      receivedInitial = true;
-      resolveInitial();
-    }
+    const recorded = recordActivity(presence);
     if (enrichers.length > 0) {
-      void applyEnrichers(presence, updateGeneration);
+      void applyEnrichers(recorded, updateGeneration);
+      return;
     }
+
+    publish(recorded);
+    resolveFirstUpdate();
   });
 
   return {
